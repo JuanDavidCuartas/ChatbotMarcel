@@ -6,7 +6,13 @@ from nltk.tokenize import word_tokenize #importamos la función word_tokenize de
 import nltk
 from nltk.corpus import wordnet
 
-nltk.data.path.append(r"C:\Users\judac\AppData\Roaming\Python\Python312\site-packages\nltk")
+#nltk.data.path.append(r"C:\Users\judac\AppData\Roaming\Python\Python312\site-packages\nltk")
+import os
+from nltk.tokenize import RegexpTokenizer #importamos la clase RegexpTokenizer de la librería nltk.tokenize para tokenizar palabras
+
+nltk_path = os.path.join(os.getenv("APPDATA"), "nltk_data")
+nltk.data.path.append(nltk_path)
+
 
 # Verificar si los datos de NLTK están disponibles, si no, descargarlos
 try:
@@ -56,20 +62,42 @@ def get_celular(orden: int):
 #Ruta del chatbot que responde con modelos segun comentario
 @app.get('/chatbot', tags=["Chatbot"])
 def chatbot(query: str):
-    #Tokenizamos la consulta, osea dividimos la consulta en palabras
-    query_words = word_tokenize(query.lower())
-    
-    #Buscamos sinónimos de las palabras clave
-    synonyms = {word for q in query_words for word in get_synonyms(q)} | set(query_words)
-    
-    #filtramos la lista de celulares buscando coincidencias en los comentarios
-    results = [m for m in celulares_list if any (s in m ['Comentarios'].lower() for s in synonyms)]
-    
-    #Si encontramos celulares enviamos la lista, si no se muestra un mensaje de que no se encontraron coincidencias
-    return JSONResponse (content={"respuesta": "alguno de estos es tu celular?" if results else "No se encontraron celulares con ese daño", "celulares": results})
+    # Verifica que nltk tenga los datos necesarios
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt')
+
+    try:
+        nltk.data.find('corpora/wordnet')
+    except LookupError:
+        nltk.download('wordnet')
+
+    # Tokenizamos la consulta (verificando si nltk está correctamente instalado)
+    try:
+        tokenizer = RegexpTokenizer(r'\w+')  # Tokenizador que solo toma palabras
+        query_words = tokenizer.tokenize(query.lower())
+    except Exception as e:
+        return JSONResponse(content={"error": f"Error al tokenizar la consulta: {str(e)}"}, status_code=500)
+
+    # Obtenemos sinónimos de cada palabra
+    synonyms = set(query_words)
+    for q in query_words:
+        synonyms.update(get_synonyms(q))
+
+    # Filtramos los celulares con coincidencias en comentarios
+    try:
+        results = [m for m in celulares_list if any(s in str(m.get('Comentarios', '')).lower() for s in synonyms)]
+    except Exception as e:
+        return JSONResponse(content={"error": f"Error al buscar coincidencias: {str(e)}"}, status_code=500)
+
+    # Devolvemos la respuesta
+    return JSONResponse(content={"respuesta": "¿Alguno de estos es tu celular?" if results else "No se encontraron celulares con ese daño", "celulares": results})
 
 #Ruta para buscar celulares por marca
-@app.get('/celulares/', tags=['Celulares'])
+@app.get('/celulares/marca', tags=['Celulares'])
 def get_celulares_por_marca(marca: str):
+    print(f"Marca recibida: {marca}")
     #filtramos la lista de celulares buscando coincidencias en la marca
     results = [m for m in celulares_list if marca.lower() in m['Marca'].lower()]
+    return JSONResponse(content={"celulares": results}) if results else {"mensaje": "No se encontraron celulares con esa marca"}  #devolvemos la lista de celulares o un mensaje de error si no se encontraron celulares
