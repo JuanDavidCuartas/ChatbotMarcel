@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <title>Servicio Técnico</title>
+</head>
+<body>
+    <div class="container">
+    <h1>¡Bienvenido al área de servicio técnico!</h1>
+    <p>En esta página podrás consultar el estado de tu celular y obtener ayuda con el chatbot.</p>
+    
+    <!-- Buscar celular por número de orden -->
+    <div class="cards">
+        <div class="form-group">
+            <h2>Consultar celular por número de orden</h2>
+            <form action="/celulares/orden" method="get">
+            <label for="orden">Número de Orden:</label>
+            <input type="number" id="orden" name="orden" placeholder="Ingresa tu número de orden" required>
+            <button type="submit">Consultar</button>
+            </form>
+        </div>
+        <!-- Buscar celulares por marca -->
+        <div class="form-group">
+            <h2>Consultar celulares por marca</h2>
+            <form action="/celulares/marca" method="get">
+                <label for="marca">Marca:</label>
+                <input type="text" id="marca" name="marca" placeholder="Ingresa la marca de tu celular" required>
+                <button type="submit">Consultar</button>
+            </form>
+        </div>
+        <!-- Consultar con el chatbot -->
+        <div class="form-group">
+            <h2>Consultar con el chatbot</h2>
+            <form action="/chatbot" method="get">
+                <label for="query">Usa palabras clave:</label>
+                <input type="text" id="query" name="query" placeholder="Escribe una palabra clave" required>
+                <button type="submit">Consultar</button>
+            </form>
+        </div>
+    </div>
+    <p><a href="/docs">Ir a la documentación de la API</a></p>
+
+
+<!-- Ventana emergente (modal) mejorada -->
+<div id="resultadoModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Resultados de la consulta</h3>
+        <div class="modal-body">
+            <pre id="resultadoTexto"></pre> <!-- Aquí se mostrarán los datos -->
+        </div>
+        <div class="modal-footer">
+            <button id="cerrarModal">Entendido</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("resultadoModal");
+        const resultadoTexto = document.getElementById("resultadoTexto");
+        const closeBtn = document.querySelector(".close");
+        const cerrarModalBtn = document.getElementById("cerrarModal");
+
+         // 🔹 Asegurar que el modal se oculte al cargar la página
+        modal.style.display = "none";
+        resultadoTexto.textContent = ""; // Limpia el contenido previo
+    
+        function cerrarModal() {
+            modal.style.display = "none";
+        }
+    
+        closeBtn.onclick = cerrarModal;
+        cerrarModalBtn.onclick = cerrarModal;
+    
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                cerrarModal();
+            }
+        };
+    
+        // Función para manejar la consulta sin recargar la página
+        function manejarConsulta(form, urlBase) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                const formData = new FormData(form);
+                const queryString = new URLSearchParams(formData).toString();
+                const url = `${urlBase}?${queryString}`;
+    
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        function formatearResultado(data) {
+                            if (!data || (data.celulares && data.celulares.length === 0)) {
+                                return "<p>No se encontraron resultados.</p>";
+                            }
+
+                            let html = "<pre>"; // Mantiene el formato de terminal
+
+                            // Si la respuesta tiene una lista "celulares", recorrerla
+                            if (data.celulares) {
+                                data.celulares.forEach((celular, index) => {
+                                    for (let key in celular) {
+                                        html += `<span class="verde">${key}:</span> ${celular[key]}\n`;
+                                    }
+                                    html += "------------------------------------\n";
+                                });
+                            } else {
+                                // Si la API devuelve un solo objeto, formatearlo
+                                for (let key in data) {
+                                    html += `<span class="verde">${key}:</span> ${data[key]}\n`;
+                                }
+                                html += "------------------------------------\n";
+                            }
+
+                            html += "</pre>";
+                            return html;
+                        }
+
+
+
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(data => {
+                                resultadoTexto.innerHTML = formatearResultado(data); // Muestra los resultados formateados
+                                modal.style.display = "flex";
+                            })
+                            .catch(error => console.error("Error:", error));
+
+
+                        modal.style.display = "flex"; // Muestra el modal centrado
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        }
+    
+        // Conectar los formularios con la función
+        manejarConsulta(document.querySelector("form[action='/celulares/orden']"), "/celulares/orden");
+        manejarConsulta(document.querySelector("form[action='/celulares/marca']"), "/celulares/marca");
+        manejarConsulta(document.querySelector("form[action='/chatbot']"), "/chatbot");
+    });
+    </script>
+    
+    
+</div>
+</body>
+</html>

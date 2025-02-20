@@ -1,0 +1,235 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Estilo general */
+body {
+    min-height: 100vh; /* Ocupa toda la altura de la pantalla */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el contenido horizontalmente */
+    justify-content: center; /* Centra el contenido verticalmente */
+    padding: 20px; /* Espaciado más flexible en lugar de un padding fijo */
+    margin: 0;
+    background: rgb(20,64,164);
+    background: radial-gradient(circle at top, rgba(20,64,164,1) 0%, rgba(24,24,103,1) 100%);
+    color: #333;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 2, 29, 0.1);
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Espacio entre las tarjetas */
+    padding: 20px;
+    flex-wrap: wrap; /* Permite que se ajusten en pantallas pequeñas */
+}
+
+/* Títulos */
+h1{
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 0%;
+    color: #444;
+}
+h2{
+    text-align: center;
+    margin-bottom: 10px;
+    color: #444;
+}
+h3{
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Formularios */
+form {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column; /* Organiza los elementos en columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+    gap: 10px; /* Espacio entre el input y el botón */
+}
+
+.form-group {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 250px;
+}
+
+.cards {
+    display: flex;
+    justify-content: center; /* Centra las tarjetas horizontalmente */
+    align-items: flex-start; /* Alinea las tarjetas en la parte superior */
+    gap: 20px; /* Espacio entre las tarjetas */
+    flex-wrap: wrap; /* Permite que se ajusten en pantallas pequeñas */
+    padding: 20px;
+}
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input, select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Modal - Ventana emergente */
+.modal {
+    display: none; /* Ocultar por defecto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenedor del modal */
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    max-height: 80vh; /* Altura máxima del modal */
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Contenedor con scroll para los resultados */
+.modal-body {
+    font-family: "Courier", monospace; /* Fuente tipo terminal */
+    font-size: 14px;
+    background: rgb(43, 43, 43); /* Fondo oscuro como una terminal */
+    padding: 10px;
+    border-radius: 5px;
+    overflow-y: auto;
+    max-height: 50vh; /* Scroll si hay muchos resultados */
+    word-wrap: break-word;
+    color: white; /* Texto normal en blanco */
+    text-align: left; /* Alineación a la izquierda */
+}
+
+
+/* Asegura que el texto largo no se desborde */
+.modal-body pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Courier New', Courier, monospace;
+    line-height: 1.5;
+}
+
+/* Botón para cerrar el modal */
+.modal-footer {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.modal-footer button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.modal-footer button:hover {
+    background: #0056b3;
+}
+
+/* Botón "X" para cerrar */
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+
+
+.resultado-item {
+    background: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.resultado-item h4 {
+    color: #007bff;
+    margin-bottom: 5px;
+}
+
+.modal-body ul {
+    list-style: none;
+    padding: 0;
+}
+
+.modal-body li {
+    padding: 3px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.clave {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.valor {
+    color: #333;
+}
+
+.verde {
+    color: #3fdd3f; /* Verde estilo terminal */
+    font-weight: bold; /* Resalta el texto */
+    font-family: 'Courier New', Courier, monospace; /* Fuente tipo terminal */
+    letter-spacing: 0.5px; /* Espaciado entre letras */
+}
+
