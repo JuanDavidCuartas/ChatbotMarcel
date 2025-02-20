@@ -41,7 +41,48 @@
             </form>
         </div>
     </div>
-    <p><a href="/docs">Ir a la documentación de la API</a></p>
+
+
+    <!-- Botón para abrir el formulario -->
+    <button id="abrirFormulario">Agregar nueva orden</button>
+
+    <!-- Modal del formulario (oculto por defecto) -->
+    <div id="modalAgregar" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarFormulario()">&times;</span>
+            <h2>Agregar Nueva Orden</h2>
+            <form id="formAgregar">
+                <div class="form-container">
+                    <label>Cliente:</label>
+                    <input type="text" id="cliente" required>
+
+                    <label>Celular:</label>
+                    <input type="text" id="celular" required>
+
+                    <label>Marca:</label>
+                    <input type="text" id="marcaNuevo" required>
+
+                    <label>Modelo:</label>
+                    <input type="text" id="modelo" required>
+
+                    <label>Estado:</label>
+                    <select id="estado" required>
+                        <option value="">Seleccionar estado</option>
+                    </select>
+
+                    <label>Comentarios:</label>
+                    <textarea id="comentarios" required></textarea>
+
+                    <label>Técnico:</label>
+                    <select id="tecnico" required>
+                        <option value="">Seleccionar técnico</option>
+                    </select>
+
+                    <button type="submit" id="guardarOrden">Guardar Orden ✅</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
 <!-- Ventana emergente (modal) mejorada -->
@@ -144,9 +185,150 @@
         manejarConsulta(document.querySelector("form[action='/celulares/marca']"), "/celulares/marca");
         manejarConsulta(document.querySelector("form[action='/chatbot']"), "/chatbot");
     });
+
+// Abrir modal
+document.getElementById("abrirFormulario").addEventListener("click", function () {
+    let modal = document.getElementById("modalAgregar");
+    modal.classList.add("visible");
+    console.log("Formulario abierto"); // Verifica si se abre correctamente
+});
+
+// Función para cerrar modal
+function cerrarFormulario() {
+    console.log("Intentando cerrar el formulario..."); 
+    let modal = document.getElementById("modalAgregar");
+    modal.classList.remove("visible");
+    console.log("Formulario cerrado"); // Verifica si el código llega aquí
+}
+
+    // Cerrar al hacer clic en la "X"
+    document.querySelector(".close").addEventListener("click", function () {
+        console.log("Botón de cerrar clickeado");
+        cerrarFormulario();
+    });
+
+    // Cerrar al hacer clic fuera del modalwindow.addEventListener("click", function (event) {
+        window.addEventListener("click", function (event) {
+    if (!event) {
+        console.error("No se detectó el evento correctamente");
+        return;
+    }
+
+    console.log("Se hizo clic en:", event.target); // 🔹 Verifica si detecta clics
+
+    let modal = document.getElementById("modalAgregar");
+
+    // Si se hace clic en el fondo del modal (pero no en el contenido), se cierra
+    if (event.target === modal) {
+        console.log("Clic fuera del formulario, cerrando modal...");
+        cerrarFormulario();
+    }
+});
+
+
+// Enviar informacion del formulario y Cerrar después de enviar el formulario
+document.getElementById("formAgregar").addEventListener("submit", function (event) {
+    event.preventDefault(); // Evita que la página se recargue
+
+    let cliente = document.getElementById("cliente").value;
+    let celular = document.getElementById("celular").value;
+    let marca = document.getElementById("marcaNuevo").value;
+    let modelo = document.getElementById("modelo").value;
+    let estado = document.getElementById("estado").value;
+    let comentarios = document.getElementById("comentarios").value;
+    let tecnico = document.getElementById("tecnico").value;
+
+    console.log("Valor de marca antes de enviar:", marca);
+
+    if (marca === "") {
+        alert("El campo 'Marca' está vacío, revisa el formulario.");
+        return;
+    }
+
+    fetch("/celulares/agregar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            cliente: cliente,
+            celular: celular,
+            marca: marca,
+            modelo: modelo,
+            estado: estado,
+            comentarios: comentarios,
+            tecnico: tecnico
+        })
+    })
+    .then(response => response.json())  // ✅ Asegura que interpretamos la respuesta como JSON
+    .then(data => {
+        console.log("Respuesta de la API:", data); // 🔹 Verifica lo que devuelve la API en la consola
+
+        if (data.Mensaje) {
+            alert(data.Mensaje); // ✅ Muestra el mensaje correcto en la alerta
+        } else {
+            alert("Error en la respuesta: " + JSON.stringify(data)); // 🔹 Muestra errores en detalle
+        }
+
+        cerrarFormulario(); // ✅ Cierra el modal
+        document.getElementById("formAgregar").reset(); // ✅ Limpia el formulario
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("❌ Ocurrió un error al agregar el celular.");
+    });
+});
+
+
+
+    // Función para cargar la lista de técnicos
+    document.addEventListener("DOMContentLoaded", function () {
+    // Cargar la lista de técnicos desde la API
+    fetch("/celulares/tecnicos")
+        .then(response => response.json())
+        .then(data => {
+            let tecnicoSelect = document.getElementById("tecnico");
+            data.tecnicos.forEach(tecnico => {
+                let option = document.createElement("option");
+                option.value = tecnico;
+                option.textContent = tecnico;
+                tecnicoSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Error al cargar técnicos:", error));
+});
+
+
+    // Función para cargar la lista de estados
+    document.addEventListener("DOMContentLoaded", function () {
+    fetch("/estados")
+        .then(response => response.json())
+        .then(data => {
+            let selectEstado = document.getElementById("estado");
+
+            // Limpia el select antes de agregar opciones
+            selectEstado.innerHTML = '<option value="">Seleccionar estado</option>';
+
+            // Verifica si hay datos antes de agregar opciones
+            if (data.estados && data.estados.length > 0) {
+                data.estados.forEach(estado => {
+                    let option = document.createElement("option");
+                    option.value = estado;
+                    option.textContent = estado;
+                    selectEstado.appendChild(option);
+                });
+            } else {
+                console.warn("No se encontraron estados en la API.");
+            }
+        })
+        .catch(error => console.error("Error al cargar estados:", error));
+});
+
+
+
     </script>
     
     
 </div>
+<p><a href="/docs" style="display: block; text-align: center;">Ir a la documentación de la API</a></p>
+
 </body>
 </html>

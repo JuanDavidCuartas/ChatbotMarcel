@@ -1,3 +1,5 @@
+import csv #Importamos la librería csv
+
 from fastapi import FastAPI, HTTPException #importamos la clase FastAPI del framework FastAPI y la clase HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse #importamos la clase JSONResponse de la librería responses de FastAPI para devolver respuestas en formato JSON
 import pandas as pd #importamos la librería pandas para trabajar con dataframes
@@ -12,6 +14,7 @@ nltk.data.path.append(nltk_path)
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.requests import Request
+from pydantic import BaseModel
 
 
 
@@ -134,3 +137,72 @@ def chatbot(query: str):
     # Devolvemos la respuesta
     return JSONResponse(content={"respuesta": "¿Alguno de estos es tu celular?" if results_modificados else "No se encontraron celulares con ese daño", "celulares": results_modificados})
 
+
+
+#Función para obtener la lista de técnicos
+@app.get('/celulares/tecnicos', tags=["Celulares"])
+def obtener_tecnicos():
+    # Extraer la lista única de técnicos desde celulares_list
+    tecnicos = sorted(set(m["Técnico"] for m in celulares_list if m["Técnico"].strip()))
+    return JSONResponse(content={"tecnicos": tecnicos})
+
+
+#Función para obtener el estado de un celular
+@app.get('/estados', tags=["Celulares"])
+def get_estados():
+    # Verifica que celulares_list esté cargado
+    if not celulares_list:
+        return JSONResponse(content={"error": "No hay datos disponibles"}, status_code=500)
+
+    # Extraer valores únicos de la columna "Estado"
+    estados_unicos = list(set(m["Estado"] for m in celulares_list if m.get("Estado")))
+
+    return JSONResponse(content={"estados": estados_unicos})
+
+
+
+
+
+#Función para agregar un nuevo celular
+
+# 📌 Definimos un modelo de datos con Pydantic
+class Celular(BaseModel):
+    cliente: str
+    celular: str
+    marca: str
+    modelo: str
+    estado: str
+    comentarios: str
+    tecnico: str
+
+@app.post('/celulares/agregar', tags=["Celulares"])
+def agregar_celular(data: Celular):  # Recibe el JSON en el cuerpo
+    try:
+        
+        max_orden = max(int(m["Orden"]) for m in celulares_list) + 1 if celulares_list else 1
+
+        nuevo_celular = {
+            "Orden": max_orden,
+            "Cliente": data.cliente,
+            "Celular": data.celular,
+            "Marca": data.marca,
+            "Modelo": data.modelo,
+            "Estado": data.estado,
+            "Comentarios": data.comentarios,
+            "Técnico": data.tecnico
+        }
+
+        # 📌 Agregar al archivo CSV
+        with open("datos_servicio_tecnico_final.csv", mode="a", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=nuevo_celular.keys(), delimiter=";")
+            if file.tell() == 0:
+                writer.writeheader()
+            writer.writerow(nuevo_celular)
+
+        # 📌 Agregar a la lista en memoria
+        celulares_list.append(nuevo_celular)
+
+        return {"Mensaje": "Celular agregado correctamente", "Celular": nuevo_celular}
+
+    except Exception as e:
+        return {"Error": str(e)}

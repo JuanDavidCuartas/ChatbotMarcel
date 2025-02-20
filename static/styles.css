@@ -233,3 +233,87 @@ button:hover {
     letter-spacing: 0.5px; /* Espaciado entre letras */
 }
 
+/* 🔹 Ocultar el modal por defecto */
+#modalAgregar {
+    display: none; /* Mantener oculto */
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+/* 🔹 Mostrar el modal solo cuando se agregue la clase */
+#modalAgregar.visible {
+    display: flex;
+}
+
+
+/* 🔹 Estilos del contenido del modal */
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 50%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* 🔹 Contenedor del formulario (para alineación compacta) */
+.form-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Etiquetas más pequeñas que los inputs */
+    gap: 10px;
+}
+
+/* 🔹 Estilo para etiquetas */
+.form-container label {
+    font-weight: bold;
+    text-align: right;
+    padding-right: 10px;
+}
+
+/* 🔹 Estilo para inputs y select */
+.form-container input,
+.form-container textarea,
+.form-container select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#guardarOrden {
+    grid-column: span 2; /* El botón ocupa toda la fila */
+    padding: 10px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+a {
+    clear: both;
+    text-align: center;
+    margin-top: 20px;
+    color: white;
+    text-decoration: none; /* Opcional: quitar subrayado */
+}
+
+a:visited {
+    color: rgb(0, 174, 255); /* Color cuando ya fue visitado */
+}
+
+a:hover {
+    color: rgb(171, 217, 255); /* Color cuando pasas el mouse */
+    text-decoration: underline;
+}
+
+a:active {
+    color: rgb(238, 238, 255); /* Color cuando haces clic */
+}
